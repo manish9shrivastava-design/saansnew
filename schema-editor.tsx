@@ -7,15 +7,14 @@ import { z } from 'zod';
 import { PlusCircle, Trash2, Wand2, Loader2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import type { Schema } from '@/lib/types';
 import { updateSchema, suggestRules } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
-import { ScrollArea } from './ui/scroll-area';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './dialog';
+import { ScrollArea } from './scroll-area';
 
 const fieldDefinitionSchema = z.object({
   id: z.string(),
@@ -47,10 +46,11 @@ export function SchemaEditor({ initialSchema }: { initialSchema: Schema }) {
   const form = useForm<SchemaFormValues>({
     resolver: zodResolver(schemaFormSchema),
     defaultValues: {
-      fields: initialSchema.map(field => ({ 
-        ...field, 
+      fields: initialSchema.map(field => ({
+        ...field,
+        type: field.type as 'text' | 'number' | 'email' | 'date' | 'select',
         validations: field.validations.join(', '),
-        options: field.options?.join(', ') 
+        options: field.options?.join(', '),
       })),
     },
   });
@@ -73,7 +73,7 @@ export function SchemaEditor({ initialSchema }: { initialSchema: Schema }) {
         options: field.options?.split(',').map(v => v.trim()).filter(Boolean),
       }));
 
-      const result = await updateSchema(formattedSchema);
+      const result = await updateSchema(formattedSchema as Schema);
       if (result.success) {
         toast({ title: 'Success', description: result.message });
       } else {

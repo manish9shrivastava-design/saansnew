@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, Save } from 'lucide-react';
@@ -22,10 +22,10 @@ function buildZodSchema(schema: Schema) {
     // Initialize validator based on type
     switch (field.type) {
       case 'number':
-        validator = z.coerce.number({ invalid_type_error: 'Must be a number' });
+        validator = z.coerce.number({ error: 'Must be a number' });
         break;
       case 'date':
-        validator = z.coerce.date({ invalid_type_error: 'Invalid date' });
+        validator = z.coerce.date({ error: 'Invalid date' });
         break;
       case 'email':
         validator = z.string().email({ message: 'Invalid email address' });
@@ -121,7 +121,6 @@ export function DataEntryForm({ schema }: { schema: Schema }) {
         {schema.map(field => (
           <FormField
             key={field.id}
-            control={form.control}
             name={field.name}
             render={({ field: formField }) => (
               <FormItem>
@@ -129,17 +128,15 @@ export function DataEntryForm({ schema }: { schema: Schema }) {
                 <FormControl>
                   {field.type === 'select' ? (
                      <Select onValueChange={formField.onChange} defaultValue={formField.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={`Select ${field.label}`} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {field.options?.map(option => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder={`Select ${field.label}`} />
+                        </SelectTrigger>
+                       <SelectContent>
+                         {field.options?.map(option => (
+                           <SelectItem key={option} value={option}>{option}</SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
                   ) : (
                     <Input
                       type={field.type === 'email' ? 'email' : field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
